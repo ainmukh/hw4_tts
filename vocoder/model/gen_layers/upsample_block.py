@@ -1,5 +1,6 @@
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.nn.utils import weight_norm
 from typing import List
 from ..gen_layers import MultiReceptiveField
 
@@ -11,7 +12,7 @@ class UpSampleBlock(nn.Module):
         super(UpSampleBlock, self).__init__()
         stride = kernel_size // 2
         padding = (kernel_size - stride) // 2
-        self.conv = nn.ConvTranspose1d(channels, channels // 2, kernel_size, stride, padding=padding)
+        self.conv = weight_norm(nn.ConvTranspose1d(channels, channels // 2, kernel_size, stride, padding=padding))
         self.mrf = MultiReceptiveField(kernel_res, dilation, relu_slope, channels // 2)
         self.relu_slope = relu_slope
 
