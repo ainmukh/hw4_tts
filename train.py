@@ -56,9 +56,12 @@ def main(config):
     # build optimizer, learning rate scheduler. delete every lines containing lr_scheduler for disabling scheduler
     trainable_params = filter(lambda p: p.requires_grad, generator.parameters())
     gen_optimizer = config.init_obj(config['optimizer']['gen_optimizer'], torch.optim, trainable_params)
-    trainable_params = filter(lambda p: p.requires_grad, itertools.chain(mpd.parameters(), msd.parameters()))
-    dis_optimizer = config.init_obj(config['optimizer']['dis_optimizer'], torch.optim, trainable_params)
-
+    # trainable_params = filter(lambda p: p.requires_grad, itertools.chain(mpd.parameters(), msd.parameters()))
+    # dis_optimizer = config.init_obj(config['optimizer']['dis_optimizer'], torch.optim, trainable_params)
+    dis_optimizer = torch.optim.AdamW(
+        [{'params': mpd.parameters()}, {'params': msd.parameters()}],
+        lr=0.0002, betas=(0.8, 0.99)
+    )
     gen_scheduler = config.init_obj(config["lr_scheduler"], torch.optim.lr_scheduler, gen_optimizer)
     dis_scheduler = config.init_obj(config["lr_scheduler"], torch.optim.lr_scheduler, dis_optimizer)
 
