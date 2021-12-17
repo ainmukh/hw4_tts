@@ -12,5 +12,6 @@ class MSELossGenerator(MSELoss):
         """
         loss = 0
         for x in doutput:
-            loss += super().forward(x, torch.ones(x.size(), device=x.device))
+            loss += ((x - 1)**2).mean()
+            # loss += super().forward(x, torch.ones(x.size(), device=x.device))
         return loss
