@@ -56,6 +56,11 @@ def mel_spectrogram(y, n_fft, num_mels, sampling_rate, hop_size, win_size, fmin,
     return spec
 
 
+def set_requires_grad(model, flag):
+    for p in model.parameters():
+        p.requires_grad = flag
+
+
 class Trainer(BaseTrainer):
     """
     Trainer class
@@ -126,6 +131,8 @@ class Trainer(BaseTrainer):
 
         # DISCRIMINATOR
         if not self.overfit:
+            set_requires_grad(self.mpd, True)
+            set_requires_grad(self.msd, True)
             self.optimizer_dis.zero_grad()
             # MPD
             mpd_real, mpd_gen, _, _ = self.mpd(batch.waveform, batch.waveform_gen.detach())
@@ -141,6 +148,8 @@ class Trainer(BaseTrainer):
         # GENERATOR
         self.optimizer_gen.zero_grad()
         if not self.overfit:
+            set_requires_grad(self.mpd, False)
+            set_requires_grad(self.msd, False)
             batch.mpd_real, batch.mpd_gen, \
                 batch.mpd_feat_real, batch.mpd_feat_gen = self.mpd(
                     batch.waveform, batch.waveform_gen
@@ -153,23 +162,23 @@ class Trainer(BaseTrainer):
         generator_loss.backward()
         self.optimizer_gen.step()
 
-        # self.writer.set_step((epoch - 1) * self.len_epoch + batch_num)
-        # self.train_metrics.update('mel_loss', mel_loss.item())
-        # if fm_loss is not None:
-        #     self.train_metrics.update('fm_loss', fm_loss.item())
-        # self.train_metrics.update('gen_loss', generator_loss.item())
-        # self.train_metrics.update('grad norm', self.get_grad_norm())
+        self.writer.set_step((epoch - 1) * self.len_epoch + batch_num)
+        self.train_metrics.update('mel_loss', mel_loss.item())
+        if fm_loss is not None:
+            self.train_metrics.update('fm_loss', fm_loss.item())
+        self.train_metrics.update('gen_loss', generator_loss.item())
+        self.train_metrics.update('grad norm', self.get_grad_norm())
 
         if self.gen_scheduler is not None:
             self.gen_scheduler.step()
             self.dis_scheduler.step()
 
-        # if batch_num % self.log_step == 0 and batch_num:
-        #     self.writer.add_scalar(
-        #         "learning rate", self.gen_scheduler.get_last_lr()[0]
-        #     )
-        #     self._log_predictions(batch.melspec_gen, batch.transcript)
-        #     self._log_scalars(self.train_metrics)
+        if batch_num % self.log_step == 0 and batch_num:
+            self.writer.add_scalar(
+                "learning rate", self.gen_scheduler.get_last_lr()[0]
+            )
+            self._log_predictions(batch.melspec_gen, batch.transcript)
+            self._log_scalars(self.train_metrics)
 
     def _train_epoch(self, epoch):
         """
