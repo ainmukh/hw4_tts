@@ -31,6 +31,7 @@ class MelSpectrogram(nn.Module):
             f_min=config.f_min,
             f_max=config.f_max,
             n_mels=config.n_mels,
+            center=False
         )
 
         # The is no way to set power in constructor in 0.5.0 version.
