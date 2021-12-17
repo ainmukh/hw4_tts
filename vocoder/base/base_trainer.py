@@ -136,8 +136,8 @@ class BaseTrainer:
         arch = type(self.generator).__name__
         state = {
             'gen_state_dict': self.generator.state_dict(),
-            # 'mpd_state_dict': self.mpd.state_dict(),
-            # 'msd_state_dict': self.msd.state_dict()
+            'mpd_state_dict': self.mpd.state_dict(),
+            'msd_state_dict': self.msd.state_dict()
         }
 
         filename = str(self.checkpoint_dir / "checkpoint-epoch{}.pth".format(epoch))

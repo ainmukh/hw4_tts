@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.nn.utils import weight_norm
 
 
 class SubSDiscriminator(nn.Module):
@@ -12,20 +13,20 @@ class SubSDiscriminator(nn.Module):
         stride = [2, 4, 4]
 
         layers = [
-            nn.Conv1d(1, channels, kernel_size=15, stride=1, padding=7),
+            weight_norm(nn.Conv1d(1, channels, kernel_size=15, stride=1, padding=7))
             # nn.Conv1d(channels, channels, kernel_size, stride=2, groups=4, padding=padding),
         ]
         for i in range(3):
-            layers += [nn.Conv1d(
+            layers += [weight_norm(nn.Conv1d(
                 channels, channels * 2,
                 kernel_size, stride[i],
                 groups=groups, padding=padding
-            )]
+            ))]
             channels = channels * 2
         layers += [
-            nn.Conv1d(channels, channels, kernel_size, 1, groups=groups, padding=padding),
-            nn.Conv1d(channels, channels, kernel_size=5, padding=2),
-            nn.Conv1d(channels, 1, kernel_size=3, padding=1)
+            weight_norm(nn.Conv1d(channels, channels, kernel_size, 1, groups=groups, padding=padding)),
+            weight_norm(nn.Conv1d(channels, channels, kernel_size=5, padding=2)),
+            weight_norm(nn.Conv1d(channels, 1, kernel_size=3, padding=1))
         ]
 
         self.layers = nn.ModuleList(layers)

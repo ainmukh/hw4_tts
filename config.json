@@ -102,11 +102,11 @@
     "save_dir": "saved/",
     "save_period": 5,
     "verbosity": 2,
-    "monitor": "min gen_loss",
+    "monitor": "min val_gen_loss",
     "early_stop": 100,
     "writer": "wandb",
     "project_name": "tts2",
-    "len_epoch": 150,
+    "len_epoch": 1,
     "grad_norm_clip": 10
   },
   "warm_start": ""

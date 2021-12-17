@@ -57,7 +57,9 @@ class BaseDataset(Dataset):
         audio_wave, sample_rate = torchaudio.load(audio_path)
 
         # print('audio_wave size =', audio_wave.size())
+        print('here in get item', self.split)
         if self.split == 'train' and self.segment_size is not None and audio_wave.size(-1) >= self.segment_size:
+            print('i do split!', '\n')
             max_audio_start = audio_wave.size(-1) - self.segment_size
             audio_start = random.randint(0, max_audio_start)
             audio_wave = audio_wave[:, audio_start:audio_start + self.segment_size]

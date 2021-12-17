@@ -106,7 +106,7 @@ class Trainer(BaseTrainer):
             'mel_loss', 'fm_loss', 'gen_loss', writer=self.writer
         )
         self.sr = sr
-        self.overfit = True
+        # self.overfit = True
 
     def _clip_grad_norm(self):
         if self.config["trainer"].get("grad_norm_clip", None) is not None:
