@@ -37,7 +37,6 @@ class SubPDiscriminator(nn.Module):
         self.layers = nn.ModuleList(layers)
 
     def forward(self, x):
-        print('in pd', x.size())
         _, channels, time = x.size()
         if time % self.p != 0:
             n_pad = self.p - (time % self.p)
@@ -51,5 +50,5 @@ class SubPDiscriminator(nn.Module):
             if i + 1 != len(self.layers):
                 x = F.leaky_relu(x, self.relu_slope)
             features.append(x)
-        print('out pd', torch.flatten(x, 1, -1).size())
+
         return torch.flatten(x, 1, -1), features

@@ -18,11 +18,11 @@ class MPD(nn.Module):
         features, features_pred = [], []
 
         for sub in self.subs:
-            wav, feature = sub(wav)
-            wavs.append(wav)
+            mpd_real, feature = sub(wav)
+            wavs.append(mpd_real)
             features.append(feature)
 
-            wav_pred, feature_pred = sub(wav_pred)
-            wavs_pred.append(wav_pred)
+            mpd_pred, feature_pred = sub(wav_pred)
+            wavs_pred.append(mpd_pred)
             features_pred.append(feature_pred)
         return wavs, wavs_pred, features, features_pred

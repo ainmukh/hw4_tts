@@ -16,11 +16,11 @@ class MSD(nn.Module):
         features, features_pred = [], []
 
         for sub in self.subs:
-            wav, feature = sub(wav)
-            wavs.append(wav)
+            msd_real, feature = sub(wav)
+            wavs.append(msd_real)
             features.append(feature)
 
-            wav_pred, feature_pred = sub(wav_pred)
-            wavs_pred.append(wav_pred)
+            msd_pred, feature_pred = sub(wav_pred)
+            wavs_pred.append(msd_pred)
             features_pred.append(feature_pred)
         return wavs, wavs_pred, features, features_pred
