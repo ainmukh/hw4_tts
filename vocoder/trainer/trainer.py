@@ -127,11 +127,11 @@ class Trainer(BaseTrainer):
         #     win_size=1024, fmin=0, fmax=8000, center=False
         # )
         batch.waveform = batch.waveform.unsqueeze(1)
-        print('mel, audio size =', batch.melspec_real.size(), batch.waveform.size())
+        # print('mel, audio size =', batch.melspec_real.size(), batch.waveform.size())
         batch.waveform_gen = self.generator(batch.melspec_real)
         # print('gen waveform size =', batch.waveform_gen.size())
         batch.melspec_gen = self.melspec(batch.waveform_gen.squeeze(1))
-        print('my melspec =', batch.melspec_gen.size())
+        # print('my melspec =', batch.melspec_gen.size())
         # batch.melspec_gen = mel_spectrogram(
         #     batch.waveform_gen.squeeze(1),
         #     n_fft=1024, num_mels=80,
