@@ -12,20 +12,16 @@ class SubPDiscriminator(nn.Module):
         padding = (kernel_size - 1) // 2
         channels = 32
 
-        layers = [weight_norm(nn.Conv1d(
+        layers = [weight_norm(nn.Conv2d(
             1, channels,
             kernel_size=(kernel_size, 1),
             stride=(stride, 1),
             padding=(padding, 0)
         ))]
 
-        # norm_f(Conv2d(32, 128, (kernel_size, 1), (stride, 1), padding=(get_padding(5, 1), 0))),
-        # norm_f(Conv2d(128, 512, (kernel_size, 1), (stride, 1), padding=(get_padding(5, 1), 0))),
-        # norm_f(Conv2d(512, 1024, (kernel_size, 1), (stride, 1), padding=(get_padding(5, 1), 0))),
-
         channels = [32, 128, 512, 1024]
         for i in range(3):
-            layers += [weight_norm(nn.Conv1d(
+            layers += [weight_norm(nn.Conv2d(
                 channels[i], channels[i + 1],
                 kernel_size=(kernel_size, 1),
                 stride=(stride, 1),
@@ -34,13 +30,14 @@ class SubPDiscriminator(nn.Module):
 
         channels = channels[-1]
         layers += [
-            weight_norm(nn.Conv1d(channels, channels, kernel_size=(kernel_size, 1), padding=(2, 0))),
-            weight_norm(nn.Conv1d(channels, 1, kernel_size=(3, 1), padding=(2, 0)))
+            weight_norm(nn.Conv2d(channels, channels, kernel_size=(kernel_size, 1), padding=(2, 0))),
+            weight_norm(nn.Conv2d(channels, 1, kernel_size=(3, 1), padding=(1, 0)))
         ]
 
         self.layers = nn.ModuleList(layers)
 
     def forward(self, x):
+        print('in pd', x.size())
         _, channels, time = x.size()
         if time % self.p != 0:
             n_pad = self.p - (time % self.p)
@@ -54,5 +51,5 @@ class SubPDiscriminator(nn.Module):
             if i + 1 != len(self.layers):
                 x = F.leaky_relu(x, self.relu_slope)
             features.append(x)
-
+        print('out pd', torch.flatten(x, 1, -1).size())
         return torch.flatten(x, 1, -1), features

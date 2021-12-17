@@ -124,6 +124,7 @@ class Trainer(BaseTrainer):
             sampling_rate=22050, hop_size=256,
             win_size=1024, fmin=0, fmax=8000, center=False
         )
+        batch.waveform = batch.waveform.unsqueeze(1)
         # print('mel, audio size =', batch.melspec_real.size(), batch.waveform.size())
         batch.waveform_gen = self.generator(batch.melspec_real)
         # print('gen waveform size =', batch.waveform_gen.size())
@@ -241,6 +242,7 @@ class Trainer(BaseTrainer):
                     sampling_rate=22050, hop_size=256,
                     win_size=1024, fmin=0, fmax=8000, center=False
                 )
+                batch.waveform = batch.waveform.unsqueeze(1)
                 # print('mel, audio size =', batch.melspec_real.size(), batch.waveform.size())
                 batch.waveform_gen = self.generator(batch.melspec_real)
                 # print('gen waveform size =', batch.waveform_gen.size())
