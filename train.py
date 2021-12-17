@@ -29,6 +29,7 @@ def main(config):
     # setup data_loader instances
     batch_size = config['data']['train']['batch_size']
     dataloaders = get_dataloaders(config)
+    print('got dataloaders')
 
     # build model architecture, then print to console
     generator = config.init_obj(config['arch']['generator'], module_arch)
