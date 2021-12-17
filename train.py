@@ -33,7 +33,11 @@ def main(config):
     # build model architecture, then print to console
     generator = config.init_obj(config['arch']['generator'], module_arch)
     mpd = config.init_obj(config['arch']['mpd'], module_arch)
+    print('got mpd')
+    print(mpd)
     msd = config.init_obj(config['arch']['msd'], module_arch)
+    print('got msd')
+    print(msd)
 
     if config['warm_start'] != '':
         print('Starting from checkpoint', config['warm_start'])
