@@ -27,7 +27,7 @@ class LJSpeechBase(BaseDataset):
         # self.split = 'train'
         self._data_dir = data_dir
         index = self._get_or_load_index()
-        super().__init__(index, split, *args, **kwargs)
+        super().__init__(index, split=split, *args, **kwargs)
 
     def _load_part(self):
         pass
