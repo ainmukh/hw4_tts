@@ -8,7 +8,6 @@ class SubPDiscriminator(nn.Module):
     def __init__(self, p, kernel_size: int = 5, stride: int = 3, relu_slope: float = 1e-1):
         super(SubPDiscriminator, self).__init__()
         self.p = p
-        self.relu_slope = relu_slope
         padding = (kernel_size - 1) // 2
         channels = 32
 
@@ -48,7 +47,7 @@ class SubPDiscriminator(nn.Module):
         for i, layer in enumerate(self.layers):
             x = layer(x)
             if i + 1 != len(self.layers):
-                x = F.leaky_relu(x, self.relu_slope)
+                x = F.leaky_relu(x, 0.1)
             features.append(x)
 
         return torch.flatten(x, 1, -1), features

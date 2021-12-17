@@ -31,7 +31,6 @@ class SubSDiscriminator(nn.Module):
 
         self.layers = nn.ModuleList(layers)
         # exit(print(self.layers))
-        self.relu_slope = relu_slope
 
     def forward(self, x):
         x = self.pool(x)
@@ -40,6 +39,6 @@ class SubSDiscriminator(nn.Module):
         for i, layer in enumerate(self.layers):
             x = layer(x)
             if i + 1 != len(self.layers):
-                x = F.leaky_relu(x, self.relu_slope)
+                x = F.leaky_relu(x, 0.1)
             features.append(x)
         return torch.flatten(x, 1, -1), features

@@ -12,12 +12,11 @@ class ResBlock(nn.Module):
             weight_norm(nn.Conv1d(channels, channels, kernel_size, 1, padding=padding[i], dilation=dilation[i]))
             for i in range(len(dilation))
         ])
-        self.relu_slope = relu_slope
 
     def forward(self, x):
         for conv in self.convs:
             res = x
-            x = F.leaky_relu(x, self.relu_slope)
+            x = F.leaky_relu(x, 0.1)
             x = conv(x)
             x = x + res
         return x

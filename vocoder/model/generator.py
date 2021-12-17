@@ -19,14 +19,13 @@ class Generator(nn.Module):
         # self.upsample = UpSampleBlock(pre_channels // 2**0, kernel_size[0], kernel_res, dilation[0], relu_slope)
 
         self.post_conv = weight_norm(nn.Conv1d(pre_channels // 2**len(kernel_size), 1, 7, 1, padding=3))
-        self.relu_slope = relu_slope
 
     def forward(self, x):
         x = self.pre_conv(x)
 
         x = self.upsample(x)
 
-        x = F.leaky_relu(x, self.relu_slope)
+        x = F.leaky_relu(x, 0.1)
         x = self.post_conv(x)
         x = F.tanh(x)
         return x

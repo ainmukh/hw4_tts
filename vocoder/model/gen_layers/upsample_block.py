@@ -14,10 +14,9 @@ class UpSampleBlock(nn.Module):
         padding = (kernel_size - stride) // 2
         self.conv = weight_norm(nn.ConvTranspose1d(channels, channels // 2, kernel_size, stride, padding=padding))
         self.mrf = MultiReceptiveField(kernel_res, dilation, relu_slope, channels // 2)
-        self.relu_slope = relu_slope
 
     def forward(self, x):
-        x = F.leaky_relu(x, self.relu_slope)
+        x = F.leaky_relu(x, 0.1)
         x = self.conv(x)
         # print('after up', x.size())
         x = self.mrf(x)
