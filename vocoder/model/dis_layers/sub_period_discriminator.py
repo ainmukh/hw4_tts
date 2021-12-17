@@ -36,12 +36,12 @@ class SubPDiscriminator(nn.Module):
         self.layers = nn.ModuleList(layers)
 
     def forward(self, x):
-        _, channels, time = x.size()
-        if time % self.p != 0:
-            n_pad = self.p - (time % self.p)
-            x = F.pad(x, (0, n_pad), "reflect")
+        batch_size, channels, time = x.size()
+        r = time % self.p
+        if r != 0:
+            x = F.pad(x, (0, self.p - r), "reflect")
             time = x.size(-1)
-        x = x.view(-1, channels, time // self.p, self.p)
+        x = x.view(batch_size, channels, time // self.p, self.p)
 
         features = []
         for i, layer in enumerate(self.layers):
