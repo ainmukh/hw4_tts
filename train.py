@@ -29,12 +29,14 @@ def main(config):
     # setup data_loader instances
     batch_size = config['data']['train']['batch_size']
     dataloaders = get_dataloaders(config)
-    print('got dataloaders')
 
     # build model architecture, then print to console
     generator = config.init_obj(config['arch']['generator'], module_arch)
+    print('got generator')
     mpd = config.init_obj(config['arch']['mpd'], module_arch)
+    print('got mpd')
     msd = config.init_obj(config['arch']['msd'], module_arch)
+    print('got msd')
 
     if config['warm_start'] != '':
         print('Starting from checkpoint', config['warm_start'])
