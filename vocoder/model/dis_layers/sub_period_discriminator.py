@@ -19,9 +19,14 @@ class SubPDiscriminator(nn.Module):
             padding=(padding, 0)
         ))]
 
-        for i in range(4):
+        # norm_f(Conv2d(32, 128, (kernel_size, 1), (stride, 1), padding=(get_padding(5, 1), 0))),
+        # norm_f(Conv2d(128, 512, (kernel_size, 1), (stride, 1), padding=(get_padding(5, 1), 0))),
+        # norm_f(Conv2d(512, 1024, (kernel_size, 1), (stride, 1), padding=(get_padding(5, 1), 0))),
+
+        # channels = [32, 128, 512, 1024]
+        for i in range(3):
             layers += [weight_norm(nn.Conv1d(
-                channels, channels * 4,
+                channels[i], channels[i + 1],
                 kernel_size=(kernel_size, 1),
                 stride=(stride, 1),
                 padding=(padding, 0)
