@@ -119,25 +119,25 @@ class Trainer(BaseTrainer):
     def _train_iteration(self, batch, epoch: int, batch_num: int):
         batch = batch.to(self.device)
 
-        # batch.melspec_real = self.melspec(batch.waveform)
-        batch.melspec_real = mel_spectrogram(
-            batch.waveform,
-            n_fft=1024, num_mels=80,
-            sampling_rate=22050, hop_size=256,
-            win_size=1024, fmin=0, fmax=8000, center=False
-        )
+        batch.melspec_real = self.melspec(batch.waveform)
+        # batch.melspec_real = mel_spectrogram(
+        #     batch.waveform,
+        #     n_fft=1024, num_mels=80,
+        #     sampling_rate=22050, hop_size=256,
+        #     win_size=1024, fmin=0, fmax=8000, center=False
+        # )
         batch.waveform = batch.waveform.unsqueeze(1)
-        # print('mel, audio size =', batch.melspec_real.size(), batch.waveform.size())
+        print('mel, audio size =', batch.melspec_real.size(), batch.waveform.size())
         batch.waveform_gen = self.generator(batch.melspec_real)
         # print('gen waveform size =', batch.waveform_gen.size())
-        melspec_gen = self.melspec(batch.waveform_gen.squeeze(1))
-        # print('my melspec =', melspec_gen.size())
-        batch.melspec_gen = mel_spectrogram(
-            batch.waveform_gen.squeeze(1),
-            n_fft=1024, num_mels=80,
-            sampling_rate=22050, hop_size=256,
-            win_size=1024, fmin=0, fmax=8000, center=False
-        )
+        batch.melspec_gen = self.melspec(batch.waveform_gen.squeeze(1))
+        print('my melspec =', batch.melspec_gen.size())
+        # batch.melspec_gen = mel_spectrogram(
+        #     batch.waveform_gen.squeeze(1),
+        #     n_fft=1024, num_mels=80,
+        #     sampling_rate=22050, hop_size=256,
+        #     win_size=1024, fmin=0, fmax=8000, center=False
+        # )
 
         # DISCRIMINATOR
         if not self.overfit:
@@ -241,24 +241,24 @@ class Trainer(BaseTrainer):
             ):
                 batch = batch.to(self.device)
 
-                # batch.melspec_real = self.melspec(batch.waveform)
-                batch.melspec_real = mel_spectrogram(
-                    batch.waveform,
-                    n_fft=1024, num_mels=80,
-                    sampling_rate=22050, hop_size=256,
-                    win_size=1024, fmin=0, fmax=8000, center=False
-                )
+                batch.melspec_real = self.melspec(batch.waveform)
+                # batch.melspec_real = mel_spectrogram(
+                #     batch.waveform,
+                #     n_fft=1024, num_mels=80,
+                #     sampling_rate=22050, hop_size=256,
+                #     win_size=1024, fmin=0, fmax=8000, center=False
+                # )
                 batch.waveform = batch.waveform.unsqueeze(1)
                 # print('mel, audio size =', batch.melspec_real.size(), batch.waveform.size())
                 batch.waveform_gen = self.generator(batch.melspec_real)
                 # print('gen waveform size =', batch.waveform_gen.size())
-                # batch.melspec_gen = self.melspec(batch.waveform_gen.squeeze(0))
-                batch.melspec_gen = mel_spectrogram(
-                    batch.waveform_gen.squeeze(1),
-                    n_fft=1024, num_mels=80,
-                    sampling_rate=22050, hop_size=256,
-                    win_size=1024, fmin=0, fmax=8000, center=False
-                )
+                batch.melspec_gen = self.melspec(batch.waveform_gen.squeeze(1))
+                # batch.melspec_gen = mel_spectrogram(
+                #     batch.waveform_gen.squeeze(1),
+                #     n_fft=1024, num_mels=80,
+                #     sampling_rate=22050, hop_size=256,
+                #     win_size=1024, fmin=0, fmax=8000, center=False
+                # )
 
                 if not self.overfit:
                     batch.mpd_real, batch.mpd_gen, batch.mpd_feat_real, batch.mpd_feat_gen = self.mpd(

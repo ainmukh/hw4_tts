@@ -16,9 +16,6 @@ class MelSpectrogramConfig:
     n_mels: int = 80
     power: float = 1.0
 
-    # value of melspectrograms if we fed a silence into `MelSpectrogram`
-    pad_value: float = -11.5129251
-
 
 class MelSpectrogram(nn.Module):
     def __init__(self, config: MelSpectrogramConfig):
@@ -49,6 +46,7 @@ class MelSpectrogram(nn.Module):
             fmax=config.f_max
         ).T
         self.mel_spectrogram.mel_scale.fb.copy_(torch.tensor(mel_basis))
+        self.pad_size = (config.win_length - config.hop_length) // 2
 
     def forward(self, audio: torch.Tensor) -> torch.Tensor:
         """
@@ -58,35 +56,9 @@ class MelSpectrogram(nn.Module):
         # audio, self.n_fft, self.num_mels,
         # self.sampling_rate, self.hop_size, self.win_size, self.fmin, self.fmax,
         # center = False)
-
+        audio = nn.functional.pad(audio, (self.pad_size, self.pad_size), 'reflect')
         mel = self.mel_spectrogram(audio) \
             .clamp_(min=1e-5) \
             .log_()
 
         return mel
-
-
-# def mel_spectrogram(y, n_fft, num_mels, sampling_rate, hop_size, win_size, fmin, fmax, center=False):
-#     if torch.min(y) < -1.:
-#         print('min value is ', torch.min(y))
-#     if torch.max(y) > 1.:
-#         print('max value is ', torch.max(y))
-#
-#     global mel_basis, hann_window
-#     if fmax not in mel_basis:
-#         mel = librosa_mel_fn(sampling_rate, n_fft, num_mels, fmin, fmax)
-#         mel_basis[str(fmax)+'_'+str(y.device)] = torch.from_numpy(mel).float().to(y.device)
-#         hann_window[str(y.device)] = torch.hann_window(win_size).to(y.device)
-#
-#     y = torch.nn.functional.pad(y.unsqueeze(1), (int((n_fft-hop_size)/2), int((n_fft-hop_size)/2)), mode='reflect')
-#     y = y.squeeze(1)
-#
-#     spec = torch.stft(y, n_fft, hop_length=hop_size, win_length=win_size, window=hann_window[str(y.device)],
-#                       center=center, pad_mode='reflect', normalized=False, onesided=True)
-#
-#     spec = torch.sqrt(spec.pow(2).sum(-1)+(1e-9))
-#
-#     spec = torch.matmul(mel_basis[str(fmax)+'_'+str(y.device)], spec)
-#     spec = spectral_normalize_torch(spec)
-#
-#     return spec
