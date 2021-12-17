@@ -1,5 +1,5 @@
 {
-  "name": "overfit_config",
+  "name": "train_config",
   "n_gpu": 1,
   "preprocessing": {
     "sr": 22050
@@ -97,8 +97,15 @@
       "args": {}
     }
   },
+  "lr_scheduler": {
+    "type": "StepLR",
+    "args": {
+      "step_size": 800,
+      "gamma": 0.999
+    }
+  },
   "trainer": {
-    "epochs": 75,
+    "epochs": 100,
     "save_dir": "saved/",
     "save_period": 5,
     "verbosity": 2,
@@ -106,7 +113,7 @@
     "early_stop": 100,
     "writer": "wandb",
     "project_name": "tts2",
-    "len_epoch": 200,
+    "len_epoch": 800,
     "grad_norm_clip": 10
   },
   "warm_start": ""

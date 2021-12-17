@@ -70,7 +70,8 @@ class Trainer(BaseTrainer):
             device,
             data_loader,
             valid_data_loader=None,
-            lr_scheduler=None,
+            gen_scheduler=None,
+            dis_scheduler=None,
             len_epoch=None,
             skip_oom=True,
             sr=22050
@@ -96,7 +97,8 @@ class Trainer(BaseTrainer):
             self.len_epoch = len_epoch
         self.valid_data_loader = valid_data_loader
         self.do_validation = self.valid_data_loader is not None
-        self.lr_scheduler = lr_scheduler
+        self.gen_scheduler = gen_scheduler
+        self.dis_scheduler = dis_scheduler
         self.log_step = 10
 
         self.train_metrics = MetricTracker(
@@ -173,10 +175,14 @@ class Trainer(BaseTrainer):
         self.train_metrics.update('gen_loss', generator_loss.item())
         self.train_metrics.update('grad norm', self.get_grad_norm())
 
+        if self.gen_scheduler is not None:
+            self.gen_scheduler.step()
+            self.dis_scheduler.step()
+
         if batch_num % self.log_step == 0 and batch_num:
-            # self.writer.add_scalar(
-            #     "learning rate", self.lr_scheduler.get_last_lr()[0]
-            # )
+            self.writer.add_scalar(
+                "learning rate", self.gen_scheduler.get_last_lr()[0]
+            )
             self._log_predictions(batch.melspec_gen, batch.transcript)
             self._log_scalars(self.train_metrics)
 

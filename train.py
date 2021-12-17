@@ -59,7 +59,8 @@ def main(config):
     trainable_params = filter(lambda p: p.requires_grad, itertools.chain(mpd.parameters(), msd.parameters()))
     dis_optimizer = config.init_obj(config['optimizer']['dis_optimizer'], torch.optim, trainable_params)
 
-    # lr_scheduler = config.init_obj(config["lr_scheduler"], torch.optim.lr_scheduler, optimizer)
+    gen_scheduler = config.init_obj(config["lr_scheduler"], torch.optim.lr_scheduler, gen_optimizer)
+    dis_scheduler = config.init_obj(config["lr_scheduler"], torch.optim.lr_scheduler, dis_optimizer)
 
     trainer = Trainer(
         generator, mpd, msd,
@@ -69,6 +70,8 @@ def main(config):
         device,
         dataloaders['train'],
         valid_data_loader=dataloaders['val'],
+        gen_scheduler=gen_scheduler,
+        dis_scheduler=dis_scheduler,
         len_epoch=config['trainer'].get('len_epoch', None),
         sr=config['preprocessing']['sr']
     )
