@@ -22,7 +22,8 @@ class BaseDataset(Dataset):
             limit=-1,
             max_audio_length=None,
             max_text_length=None,
-            segment_size=None
+            segment_size=None,
+            split=None
     ):
         self.config_parser = config_parser
 
@@ -48,6 +49,7 @@ class BaseDataset(Dataset):
         index = self._sort_index(index)
         self._index = index
         self.segment_size = segment_size
+        self.split = split
 
     def __getitem__(self, ind):
         data_dict = self._index[ind]
@@ -55,7 +57,7 @@ class BaseDataset(Dataset):
         audio_wave, sample_rate = torchaudio.load(audio_path)
 
         # print('audio_wave size =', audio_wave.size())
-        if self.segment_size is not None and audio_wave.size(-1) >= self.segment_size:
+        if self.split == 'train' and self.segment_size is not None and audio_wave.size(-1) >= self.segment_size:
             max_audio_start = audio_wave.size(-1) - self.segment_size
             audio_start = random.randint(0, max_audio_start)
             audio_wave = audio_wave[:, audio_start:audio_start + self.segment_size]

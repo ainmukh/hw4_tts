@@ -23,7 +23,8 @@ class LJSpeechBase(BaseDataset):
         if data_dir is None:
             data_dir = ROOT_PATH / "data" / "datasets" / "ljspeech"
             data_dir.mkdir(exist_ok=True, parents=True)
-        self.split = split
+        # self.split = split
+        self.split = 'train'
         self._data_dir = data_dir
         index = self._get_or_load_index()
         super().__init__(index, *args, **kwargs)
