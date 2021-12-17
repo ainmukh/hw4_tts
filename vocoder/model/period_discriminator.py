@@ -6,11 +6,11 @@ from .dis_layers import SubPDiscriminator
 
 
 class MPD(nn.Module):
-    def __init__(self, periods: List[int]):
+    def __init__(self, periods: List[int], kernel_size: int = 5, stride: int = 3, relu_slope: float = 1e-1):
         super(MPD, self).__init__()
         self.periods = periods
         self.subs = nn.ModuleList([
-            SubPDiscriminator(period) for period in periods
+            SubPDiscriminator(period, kernel_size, stride, relu_slope) for period in periods
         ])
 
     def forward(self, wav, wav_pred):

@@ -6,8 +6,7 @@ import torch.nn.functional as F
 class SubSDiscriminator(nn.Module):
     def __init__(self, pool: int = 0, kernel_size: int = 41, relu_slope: float = 1e-1, groups: int = 16):
         super(SubSDiscriminator, self).__init__()
-        padding = (pool - 1) // 2
-        self.pool = nn.AvgPool1d(pool, pool // 2, padding=padding) if pool else nn.Identity()
+        self.pool = nn.AvgPool1d(4, 2, padding=2) if pool else nn.Identity()
         padding = (kernel_size - 1) // 2
         channels = 128
         stride = [2, 4, 4]
@@ -16,7 +15,7 @@ class SubSDiscriminator(nn.Module):
             nn.Conv1d(1, channels, kernel_size=15, stride=1, padding=7),
             # nn.Conv1d(channels, channels, kernel_size, stride=2, groups=4, padding=padding),
         ]
-        for i in range(4):
+        for i in range(3):
             layers += [nn.Conv1d(
                 channels, channels * 2,
                 kernel_size, stride[i],
@@ -30,6 +29,7 @@ class SubSDiscriminator(nn.Module):
         ]
 
         self.layers = nn.ModuleList(layers)
+        # exit(print(self.layers))
         self.relu_slope = relu_slope
 
     def forward(self, x):

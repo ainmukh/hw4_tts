@@ -5,10 +5,10 @@ from .dis_layers import SubSDiscriminator
 
 
 class MSD(nn.Module):
-    def __init__(self):
+    def __init__(self, kernel_size: int = 41, relu_slope: float = 1e-1, groups: int = 16):
         super().__init__()
         self.subs = nn.ModuleList([
-            SubSDiscriminator(2**i) for i in range(3)
+            SubSDiscriminator(2**i, kernel_size, relu_slope, groups) for i in range(3)
         ])
 
     def forward(self, wav, wav_pred):

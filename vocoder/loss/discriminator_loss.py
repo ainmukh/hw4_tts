@@ -2,7 +2,7 @@ import torch
 from torch.nn import MSELoss
 
 
-class MSELossDiscriminator(MSELoss):
+class DiscriminatorLoss(MSELoss):
     def forward(self, doutput_gen, doutput_real):
         """
         GAN discriminator D loss

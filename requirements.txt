@@ -1,3 +1,10 @@
 torch==1.10.0
 torchaudio==0.10.0
+torchvision
 numpy
+tqdm
+matplotlib
+speechbrain
+pandas
+wandb
+librosa

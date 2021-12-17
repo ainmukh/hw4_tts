@@ -99,10 +99,6 @@ class Writer:
                         add_data({tag: self.writer.Histogram(data.cpu().detach().numpy())}, step=self.step)
                     elif name == 'add_image':
                         add_data({tag: self.writer.Image(data, caption=kwargs["caption"])}, step=self.step)
-                    elif name == 'add_text':  # TODO
-                        columns = ["Target", "Prediction", "WER", "CER"]
-                        table = self.writer.Table(data=data, columns=columns)
-                        add_data({tag: table}, step=self.step)
                     elif name == "add_audio":
                         to_log = []
                         for i, sample in enumerate(data):

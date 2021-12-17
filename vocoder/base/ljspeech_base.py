@@ -7,8 +7,8 @@ import torchaudio
 from speechbrain.utils.data_utils import download_file
 from tqdm import tqdm
 
-from tts.base import BaseDataset
-from tts.utils import ROOT_PATH
+from ..base import BaseDataset
+from ..utils import ROOT_PATH
 
 import pandas as pd
 
@@ -67,8 +67,6 @@ class LJSpeechBase(BaseDataset):
             if df[df[0] == wav_id][2].values[0] == pass_token:
                 continue
             if not df[df[0] == wav_id][2].values[0].isascii():
-                continue
-            if '[' in df[df[0] == wav_id][2].values[0]:
                 continue
             wav_text = df[df[0] == wav_id][2].values[0]
             wav_path = wav_dir / f"{wav_id}.wav"

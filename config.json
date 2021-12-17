@@ -1,0 +1,113 @@
+{
+  "name": "overfit_config",
+  "n_gpu": 1,
+  "preprocessing": {
+    "sr": 22050
+  },
+  "arch": {
+    "generator": {
+      "type": "Generator",
+      "args": {
+        "mel": 80,
+        "pre_channels": 256,
+        "kernel_size": [16, 16, 8],
+        "kernel_res": [3, 5, 7],
+        "dilation": [[1, 2], [2, 6], [3, 12]],
+        "relu_slope": 1e-1
+      }
+    },
+    "mpd": {
+      "type": "MPD",
+      "args": {
+        "periods": [2, 3, 5, 7, 11],
+        "kernel_size": 5,
+        "stride": 3,
+        "relu_slope": 1e-1
+      }
+    },
+    "msd": {
+      "type": "MSD",
+      "args": {
+        "kernel_size": 41,
+        "relu_slope": 1e-1,
+        "groups": 16
+      }
+    }
+  },
+  "data": {
+    "train": {
+      "batch_size": 32,
+      "num_workers": 5,
+      "datasets": [
+        {
+          "type": "LJSpeechDataset",
+          "args": {
+            "max_audio_length": 20,
+            "max_text_length": 100,
+            "segment_size": 8192,
+            "limit": 16
+          }
+        }
+      ]
+    },
+    "val": {
+      "batch_size": 32,
+      "num_workers": 5,
+      "datasets": [
+        {
+          "type": "LJSpeechDataset",
+          "args": {
+            "max_audio_length": 20,
+            "max_text_length": 100,
+            "segment_size": 8192,
+            "limit": 16
+          }
+        }
+      ]
+    }
+  },
+  "optimizer": {
+    "gen_optimizer": {
+      "type": "AdamW",
+      "args": {
+        "lr": 2e-4,
+        "betas": [0.8, 0.99],
+        "weight_decay": 0.01
+      }
+    },
+    "dis_optimizer": {
+      "type": "AdamW",
+      "args": {
+        "lr": 2e-4,
+        "betas": [0.8, 0.99],
+        "weight_decay": 0.01
+      }
+    }
+  },
+  "loss": {
+    "gen_loss": {
+      "type": "GeneratorLoss",
+      "args": {
+        "lambda_fm": 2,
+        "lambda_mel": 45
+      }
+    },
+    "dis_loss": {
+      "type": "DiscriminatorLoss",
+      "args": {}
+    }
+  },
+  "trainer": {
+    "epochs": 100,
+    "save_dir": "saved/",
+    "save_period": 5,
+    "verbosity": 2,
+    "monitor": "min gen_loss",
+    "early_stop": 100,
+    "writer": "wandb",
+    "project_name": "hifi-gan",
+    "len_epoch": 5,
+    "grad_norm_clip": 10
+  },
+  "warm_start": ""
+}

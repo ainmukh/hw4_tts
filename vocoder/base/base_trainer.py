@@ -5,6 +5,7 @@ from numpy import inf
 
 from ..model import Generator, MPD, MSD
 from ..logger import Writer
+from ..loss import GeneratorLoss, DiscriminatorLoss
 
 
 class BaseTrainer:
@@ -14,7 +15,9 @@ class BaseTrainer:
 
     def __init__(self,
                  generator: Generator, mpd: MPD, msd: MSD,
-                 criterion, optimizer_gen, oprimizer_dis, config, device):
+                 gen_criterion: GeneratorLoss, dis_criterion: DiscriminatorLoss,
+                 gen_optimizer, dis_optimizer,
+                 config, device):
         self.device = device
         self.config = config
         self.logger = config.get_logger("trainer", config["trainer"]["verbosity"])
@@ -22,9 +25,10 @@ class BaseTrainer:
         self.generator = generator
         self.mpd = mpd
         self.msd = msd
-        self.criterion = criterion
-        self.optimizer_gen = optimizer_gen
-        self.optimizer_dis = oprimizer_dis
+        self.gen_criterion = gen_criterion
+        self.dis_criterion = dis_criterion
+        self.optimizer_gen = gen_optimizer
+        self.optimizer_dis = dis_optimizer
 
         # for interrupt saving
         self._last_epoch = 0
@@ -55,9 +59,6 @@ class BaseTrainer:
             config.log_dir, self.logger, cfg_trainer["writer"], cfg_trainer['project_name'], config
         )
 
-        if config.resume is not None:
-            self._resume_checkpoint(config.resume)
-
     @abstractmethod
     def _train_epoch(self, epoch):
         """
@@ -83,11 +84,11 @@ class BaseTrainer:
             self._last_epoch = epoch
             result = self._train_epoch(epoch)
 
-            # save logged informations into log dict
+            # save logged information into log dict
             log = {"epoch": epoch}
             log.update(result)
 
-            # print logged informations to the screen
+            # print logged information to the screen
             for key, value in log.items():
                 self.logger.info("    {:15s}: {}".format(str(key), value))
 
@@ -134,13 +135,11 @@ class BaseTrainer:
         """
         arch = type(self.generator).__name__
         state = {
-            "arch": arch,
-            "epoch": epoch,
-            "state_dict": self.generator.state_dict(),
-            "optimizer": self.optimizer.state_dict(),
-            "monitor_best": self.mnt_best,
-            "config": self.config,
+            'gen_state_dict': self.generator.state_dict(),
+            # 'mpd_state_dict': self.mpd.state_dict(),
+            # 'msd_state_dict': self.msd.state_dict()
         }
+
         filename = str(self.checkpoint_dir / "checkpoint-epoch{}.pth".format(epoch))
         if not (only_best and save_best):
             torch.save(state, filename)
@@ -149,38 +148,3 @@ class BaseTrainer:
             best_path = str(self.checkpoint_dir / "model_best.pth")
             torch.save(state, best_path)
             self.logger.info("Saving current best: model_best.pth ...")
-
-    def _resume_checkpoint(self, resume_path):
-        """
-        Resume from saved checkpoints
-        :param resume_path: Checkpoint path to be resumed
-        """
-        resume_path = str(resume_path)
-        self.logger.info("Loading checkpoint: {} ...".format(resume_path))
-        checkpoint = torch.load(resume_path, self.device)
-        self.start_epoch = checkpoint["epoch"] + 1
-        self.mnt_best = checkpoint["monitor_best"]
-
-        # load architecture params from checkpoint.
-        if checkpoint["config"]["arch"] != self.config["arch"]:
-            self.logger.warning(
-                "Warning: Architecture configuration given in config file is different from that of "
-                "checkpoint. This may yield an exception while state_dict is being loaded."
-            )
-        self.generator.load_state_dict(checkpoint["state_dict"])
-
-        # load optimizer state from checkpoint only when optimizer type is not changed.
-        if (
-                checkpoint["config"]["optimizer"] != self.config["optimizer"] or
-                checkpoint["config"]["lr_scheduler"] != self.config["lr_scheduler"]
-        ):
-            self.logger.warning(
-                "Warning: Optimizer or lr_scheduler given in config file is different "
-                "from that of checkpoint. Optimizer parameters not being resumed."
-            )
-        else:
-            self.optimizer.load_state_dict(checkpoint["optimizer"])
-
-        self.logger.info(
-            "Checkpoint loaded. Resume training from epoch {}".format(self.start_epoch)
-        )

@@ -2,7 +2,8 @@ from operator import xor
 
 from torch.utils.data import DataLoader, ConcatDataset
 
-import tts.datasets
+# import tts.datasets
+import vocoder.datasets
 from ..collator import LJSpeechCollator
 from ..utils import ConfigParser
 
@@ -16,7 +17,7 @@ def get_dataloaders(configs: ConfigParser):
         datasets = []
         for ds in params["datasets"]:
             datasets.append(configs.init_obj(
-                ds, tts.datasets, split=split, config_parser=configs
+                ds, vocoder.datasets, split=split, config_parser=configs
             ))
         assert len(datasets)
         if len(datasets) > 1:

@@ -4,7 +4,8 @@ from ..gen_layers import ResBlock
 
 
 class MultiReceptiveField(nn.Module):
-    def __init__(self, kernel_size: List[int], dilation: List[List[int]], relu_slope: float, channels: int):
+    def __init__(self, kernel_size: List[int], dilation: List[List[List[int]]], relu_slope: float, channels: int):
+
         super(MultiReceptiveField, self).__init__()
         self.blocks = nn.ModuleList([
             ResBlock(channels, kernel_size[i], dilation[i], relu_slope) for i in range(len(kernel_size))

@@ -19,15 +19,12 @@ class BaseDataset(Dataset):
             self,
             index,
             config_parser: ConfigParser,
-            wave_augs=None,
-            spec_augs=None,
             limit=-1,
             max_audio_length=None,
             max_text_length=None,
+            segment_size=None
     ):
         self.config_parser = config_parser
-        self.wave_augs = wave_augs
-        self.spec_augs = spec_augs
 
         for entry in index:
             assert "audio_len" in entry, (
@@ -50,28 +47,21 @@ class BaseDataset(Dataset):
         # It would be easier to write length-based batch samplers later
         index = self._sort_index(index)
         self._index = index
-        self.expansion = self._get_expansion()
-
-    def _get_expansion(self):
-        s = 'Mr.,Mister Mrs.,Misess Dr.,Doctor No.,Number St.,Saint' \
-            ' Co.,Company Jr.,Junior Maj.,Major Gen.,General Drs.,Doctors' \
-            ' Rev.,Reverend Lt.,Lieutenant Hon.,Honorable Sgt.,Sergeant Capt.,Captain' \
-            ' Esq.,Esquire Ltd.,Limited Col.,Colonel Ft.,Fort'
-        # s = s.split()
-        expansion = dict()
-        for abbreviation in s.split():
-            key, value = abbreviation.split(',')
-            expansion[key] = value
-        expansion['\"'] = '\''
-        return expansion
+        self.segment_size = segment_size
 
     def __getitem__(self, ind):
         data_dict = self._index[ind]
         audio_path = data_dict["path"]
         audio_wave, sample_rate = torchaudio.load(audio_path)
+
+        # print('audio_wave size =', audio_wave.size())
+        if self.segment_size is not None and audio_wave.size(-1) >= self.segment_size:
+            max_audio_start = audio_wave.size(-1) - self.segment_size
+            audio_start = random.randint(0, max_audio_start)
+            audio_wave = audio_wave[:, audio_start:audio_start + self.segment_size]
+
         text = data_dict['text']
-        text = self.process_text(text)
-        return audio_wave, sample_rate, text, text
+        return audio_wave, sample_rate, text
 
     @staticmethod
     def _sort_index(index):
@@ -79,24 +69,6 @@ class BaseDataset(Dataset):
 
     def __len__(self):
         return len(self._index)
-
-    def process_wave(self, audio_tensor_wave: Tensor):
-        with torch.no_grad():
-            if self.wave_augs is not None:
-                audio_tensor_wave = self.wave_augs(audio_tensor_wave)
-            wave2spec = self.config_parser.init_obj(
-                self.config_parser["preprocessing"]["spectrogram"],
-                torchaudio.transforms,
-            )
-            audio_tensor_spec = wave2spec(audio_tensor_wave)
-            if self.spec_augs is not None:
-                audio_tensor_spec = self.spec_augs(audio_tensor_spec)
-            return audio_tensor_wave, audio_tensor_spec
-
-    def process_text(self, text):
-        for key, value in self.expansion.items():
-            text = text.replace(key, value)
-        return text
 
     @staticmethod
     def _filter_records_from_dataset(

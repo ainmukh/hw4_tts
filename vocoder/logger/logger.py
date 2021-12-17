@@ -12,7 +12,7 @@ def setup_logging(
     Setup logging configuration
     """
     if log_config is None:
-        log_config = str(ROOT_PATH / "tts" / "logger" / "logger_config.json")
+        log_config = str(ROOT_PATH / "vocoder" / "logger" / "logger_config.json")
     log_config = Path(log_config)
     if log_config.is_file():
         config = read_json(log_config)
