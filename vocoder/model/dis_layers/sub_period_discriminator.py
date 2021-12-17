@@ -23,7 +23,7 @@ class SubPDiscriminator(nn.Module):
         # norm_f(Conv2d(128, 512, (kernel_size, 1), (stride, 1), padding=(get_padding(5, 1), 0))),
         # norm_f(Conv2d(512, 1024, (kernel_size, 1), (stride, 1), padding=(get_padding(5, 1), 0))),
 
-        # channels = [32, 128, 512, 1024]
+        channels = [32, 128, 512, 1024]
         for i in range(3):
             layers += [weight_norm(nn.Conv1d(
                 channels[i], channels[i + 1],
@@ -31,8 +31,8 @@ class SubPDiscriminator(nn.Module):
                 stride=(stride, 1),
                 padding=(padding, 0)
             ))]
-            channels = channels * 4
 
+        channels = channels[-1]
         layers += [
             weight_norm(nn.Conv1d(channels, channels, kernel_size=(kernel_size, 1), padding=(2, 0))),
             weight_norm(nn.Conv1d(channels, 1, kernel_size=(3, 1), padding=(2, 0)))
