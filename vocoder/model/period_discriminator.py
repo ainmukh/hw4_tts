@@ -13,16 +13,27 @@ class MPD(nn.Module):
             SubPDiscriminator(period, kernel_size, stride, relu_slope) for period in periods
         ])
 
-    def forward(self, wav, wav_pred):
-        wavs, wavs_pred = [], []
-        features, features_pred = [], []
+    def forward(self, wav):
+        outputs = []
+        features = []
 
         for sub in self.subs:
-            mpd_real, feature = sub(wav)
-            wavs.append(mpd_real)
+            output, feature = sub(wav)
+            outputs.append(output)
             features.append(feature)
 
-            mpd_pred, feature_pred = sub(wav_pred)
-            wavs_pred.append(mpd_pred)
-            features_pred.append(feature_pred)
-        return wavs, wavs_pred, features, features_pred
+        return outputs, features
+
+    # def forward(self, wav, wav_pred):
+    #     wavs, wavs_pred = [], []
+    #     features, features_pred = [], []
+    #
+    #     for sub in self.subs:
+    #         mpd_real, feature = sub(wav)
+    #         wavs.append(mpd_real)
+    #         features.append(feature)
+    #
+    #         mpd_pred, feature_pred = sub(wav_pred)
+    #         wavs_pred.append(mpd_pred)
+    #         features_pred.append(feature_pred)
+    #     return wavs, wavs_pred, features, features_pred
