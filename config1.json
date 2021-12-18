@@ -113,7 +113,7 @@
     "early_stop": 100,
     "writer": "wandb",
     "project_name": "tts2",
-    "len_epoch": 800,
+    "len_epoch": 8,
     "grad_norm_clip": 10
   },
   "warm_start": ""

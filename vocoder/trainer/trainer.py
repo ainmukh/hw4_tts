@@ -14,8 +14,6 @@ from ..logger import plot_spectrogram_to_buf
 from ..utils import inf_loop, MetricTracker
 from ..collator import MelSpectrogram, MelSpectrogramConfig
 
-from librosa.filters import mel as librosa_mel_fn
-
 
 def dynamic_range_compression_torch(x, C=1, clip_val=1e-5):
     return torch.log(torch.clamp(x, min=clip_val) * C)
@@ -28,32 +26,6 @@ def spectral_normalize_torch(magnitudes):
 
 mel_basis = {}
 hann_window = {}
-
-
-def mel_spectrogram(y, n_fft, num_mels, sampling_rate, hop_size, win_size, fmin, fmax, center=False):
-    if torch.min(y) < -1.:
-        print('min value is ', torch.min(y))
-    if torch.max(y) > 1.:
-        print('max value is ', torch.max(y))
-
-    global mel_basis, hann_window
-    if fmax not in mel_basis:
-        mel = librosa_mel_fn(sampling_rate, n_fft, num_mels, fmin, fmax)
-        mel_basis[str(fmax)+'_'+str(y.device)] = torch.from_numpy(mel).float().to(y.device)
-        hann_window[str(y.device)] = torch.hann_window(win_size).to(y.device)
-
-    y = torch.nn.functional.pad(y.unsqueeze(1), (int((n_fft-hop_size)/2), int((n_fft-hop_size)/2)), mode='reflect')
-    y = y.squeeze(1)
-
-    spec = torch.stft(y, n_fft, hop_length=hop_size, win_length=win_size, window=hann_window[str(y.device)],
-                      center=center, pad_mode='reflect', normalized=False, onesided=True)
-
-    spec = torch.sqrt(spec.pow(2).sum(-1)+(1e-9))
-
-    spec = torch.matmul(mel_basis[str(fmax)+'_'+str(y.device)], spec)
-    spec = spectral_normalize_torch(spec)
-
-    return spec
 
 
 def set_requires_grad(model, flag):
@@ -135,13 +107,9 @@ class Trainer(BaseTrainer):
             set_requires_grad(self.msd, True)
             self.optimizer_dis.zero_grad()
             # MPD
-            # mpd_real, _ = self.mpd(batch.waveform)
-            # mpd_gen, _ = self.mpd(batch.waveform_gen.detach())
             mpd_real, mpd_gen, _, _ = self.mpd(batch.waveform, batch.waveform_gen.detach())
             mpd_loss = self.dis_criterion(mpd_gen, mpd_real)
             # MSD
-            # msd_real, _ = self.msd(batch.waveform)
-            # msd_gen, _ = self.msd(batch.waveform_gen.detach())
             msd_real, msd_gen, _, _ = self.msd(batch.waveform, batch.waveform_gen.detach())
             msd_loss = self.dis_criterion(msd_gen, msd_real)
 
