@@ -135,14 +135,14 @@ class Trainer(BaseTrainer):
             set_requires_grad(self.msd, True)
             self.optimizer_dis.zero_grad()
             # MPD
-            mpd_real, _ = self.mpd(batch.waveform)
-            mpd_gen, _ = self.mpd(batch.waveform_gen.detach())
-            # mpd_real, mpd_gen, _, _ = self.mpd(batch.waveform, batch.waveform_gen.detach())
+            # mpd_real, _ = self.mpd(batch.waveform)
+            # mpd_gen, _ = self.mpd(batch.waveform_gen.detach())
+            mpd_real, mpd_gen, _, _ = self.mpd(batch.waveform, batch.waveform_gen.detach())
             mpd_loss = self.dis_criterion(mpd_gen, mpd_real)
             # MSD
-            msd_real, _ = self.msd(batch.waveform)
-            msd_gen, _ = self.msd(batch.waveform_gen.detach())
-            # msd_real, msd_gen, _, _ = self.msd(batch.waveform, batch.waveform_gen.detach())
+            # msd_real, _ = self.msd(batch.waveform)
+            # msd_gen, _ = self.msd(batch.waveform_gen.detach())
+            msd_real, msd_gen, _, _ = self.msd(batch.waveform, batch.waveform_gen.detach())
             msd_loss = self.dis_criterion(msd_gen, msd_real)
 
             discriminator_loss = mpd_loss + msd_loss
@@ -154,18 +154,18 @@ class Trainer(BaseTrainer):
         if not self.overfit:
             set_requires_grad(self.mpd, False)
             set_requires_grad(self.msd, False)
-            batch.mpd_real, batch.mpd_feat_real = self.mpd(batch.waveform)
-            batch.mpd_gen, batch.mpd_feat_gen = self.mpd(batch.waveform_gen)
-            # batch.mpd_real, batch.mpd_gen, \
-            #     batch.mpd_feat_real, batch.mpd_feat_gen = self.mpd(
-            #         batch.waveform, batch.waveform_gen
-            #     )
-            batch.msd_real, batch.msd_feat_real = self.msd(batch.waveform)
-            batch.msd_gen, batch.msd_feat_gen = self.msd(batch.waveform_gen)
-            # batch.msd_real, batch.msd_gen, \
-            #     batch.msd_feat_real, batch.msd_feat_gen = self.msd(
-            #         batch.waveform, batch.waveform_gen
-            #     )
+            # batch.mpd_real, batch.mpd_feat_real = self.mpd(batch.waveform)
+            # batch.mpd_gen, batch.mpd_feat_gen = self.mpd(batch.waveform_gen)
+            batch.mpd_real, batch.mpd_gen, \
+                batch.mpd_feat_real, batch.mpd_feat_gen = self.mpd(
+                    batch.waveform, batch.waveform_gen
+                )
+            # batch.msd_real, batch.msd_feat_real = self.msd(batch.waveform)
+            # batch.msd_gen, batch.msd_feat_gen = self.msd(batch.waveform_gen)
+            batch.msd_real, batch.msd_gen, \
+                batch.msd_feat_real, batch.msd_feat_gen = self.msd(
+                    batch.waveform, batch.waveform_gen
+                )
         generator_loss, fm_loss, mel_loss = self.gen_criterion(batch)
         generator_loss.backward()
         self.optimizer_gen.step()
