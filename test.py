@@ -84,12 +84,12 @@ def main(config):
         )
         melspec_real = PIL.Image.open(plot_spectrogram_to_buf(batch['melspec_real'][i].detach().cpu()))
         melspec_real = wandb.Image(
-            # batch['melspec_real'][i].cpu().detach().numpy(),
             melspec_real,
             caption=batch['transcript'][i]
         )
+        melspec_gen = PIL.Image.open(plot_spectrogram_to_buf(batch['melspec_gen'][i].detach().cpu()))
         melspec_gen = wandb.Image(
-            batch['melspec_gen'][i].cpu().detach().numpy(),
+            melspec_gen,
             caption=batch['transcript'][i]
         )
         wandb.log({
@@ -122,14 +122,6 @@ if __name__ == "__main__":
         type=str,
         help="indices of GPUs to enable (default: all)",
     )
-    # args.add_argument(
-    #     "-t",
-    #     "--test-data-folder",
-    #     default=None,
-    #     required=True,
-    #     type=str,
-    #     help="Path to dataset",
-    # )
     args.add_argument(
         "-j",
         "--jobs",
