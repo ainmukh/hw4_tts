@@ -2,7 +2,7 @@ import argparse
 import collections
 import warnings
 
-
+import PIL
 import torch
 from torch.nn.utils.rnn import pad_sequence
 import torchaudio
@@ -13,6 +13,7 @@ import wandb
 import vocoder.model as module_arch
 from vocoder.utils import prepare_device, ConfigParser, ROOT_PATH
 from vocoder.collator import MelSpectrogramConfig, MelSpectrogram
+from vocoder.logger import plot_spectrogram_to_buf
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
@@ -59,12 +60,13 @@ def main(config):
         audio_wave, sample_rate = torchaudio.load(audio_path)
         batch['wave_form'].append(audio_wave)
         batch['transcript'].append(transcript)
+    batch['sample_rate'] = sample_rate
 
     # get batch
     waveform = pad_sequence([
         waveform_[0] for waveform_ in batch['wave_form']
     ]).transpose(0, 1)
-    batch['wave_form'] = waveform
+    batch['wave_form'] = waveform.to(device)
     batch['wave_form'].size()
 
     batch['melspec_real'] = featurizer(batch['wave_form'])
@@ -74,14 +76,16 @@ def main(config):
     # log
     project_name = config['trainer']['project_name']
     wandb.init(project=project_name)
-    for i, wave in enumerate(batch['wave_form']):
+    for i, wave in enumerate(batch['waveform_gen']):
         audio = wandb.Audio(
-            wave.cpu().detach().numpy(),
+            wave.squeeze(0).cpu().detach().numpy(),
             caption=batch['transcript'][i],
             sample_rate=batch['sample_rate']
         )
+        melspec_real = PIL.Image.open(plot_spectrogram_to_buf(batch['melspec_real'][i].detach().cpu()))
         melspec_real = wandb.Image(
-            batch['melspec_real'][i].cpu().detach().numpy(),
+            # batch['melspec_real'][i].cpu().detach().numpy(),
+            melspec_real,
             caption=batch['transcript'][i]
         )
         melspec_gen = wandb.Image(
